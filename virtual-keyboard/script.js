@@ -19,21 +19,52 @@ const keyboard = {
         this.elements.main = document.createElement('div');
         this.elements.keyboardKeysContainer = document.createElement('div');
 
-        this.elements.main.classList.add('keyboard');
+        this.elements.main.classList.add('keyboard', 'keyboard__hidden');
         this.elements.keyboardKeysContainer.classList.add('keyboard__keys');
 
         this.elements.keyboardKeysContainer.appendChild(this._createKeys());
 
         this.elements.main.appendChild(this.elements.keyboardKeysContainer);
         document.body.appendChild(this.elements.main);
+
+        this.elements.keyboardKeysList = this.elements.keyboardKeysContainer.querySelectorAll('.keyboard__key');
+
+        document.querySelector('.textarea').addEventListener('focus', () => {
+            this.open(document.querySelector('.textarea').value, currentValue => {
+                document.querySelector('.textarea').value = currentValue;
+            });
+        });
     },
 
-    _triggerHandlers() {
+    _triggerHandlers(handlerName) {
+        if (typeof this.eventHandlers[handlerName] == 'function') {
+            this.eventHandlers[handlerName](this.properties.value);
+        }
 
+    },
+
+    open(defaultValue = '', onInput, onClose) {
+        this.properties.value = defaultValue;
+        this.eventHandlers.onInput = onInput;
+        this.eventHandlers.onClose = onClose;
+
+        this.elements.main.classList.remove('keyboard__hidden');
+    },
+
+    close() {
+        this.properties.value = '';
+
+        this.elements.main.classList.add('keyboard__hidden');
     },
 
     _toggleCapsLock() {
+        this.properties.capsLock = !this.properties.capsLock;
 
+        for (let key of this.elements.keyboardKeysList) {
+            if (key.childElementCount === 0) {
+                key.textContent = this.properties.capsLock ? key.textContent.toUpperCase() : key.textContent.toLowerCase();
+            }
+        }
     },
 
     _createKeys() {
@@ -64,7 +95,7 @@ const keyboard = {
                         button.innerHTML = setIcon('backspace');
 
                         button.addEventListener('click', () => {
-                            this.properties.value = button.substring(0, this.properties.length - 1);
+                            this.properties.value = this.properties.value.substring(0, this.properties.length - 1);
                             this._triggerHandlers('onInput');
                         });
 
@@ -112,6 +143,7 @@ const keyboard = {
 
                 case 'done':
                     {
+                        button.classList.add('keyboard__done');
                         button.innerHTML = setIcon('check_circle');
 
                         button.addEventListener('click', () => {
