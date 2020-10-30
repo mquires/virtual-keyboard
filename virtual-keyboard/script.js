@@ -1,3 +1,8 @@
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const recognition = new SpeechRecognition();
+recognition.interimResults = true;
+
 const keyboard = {
     elements: {
         main: null,
@@ -12,8 +17,50 @@ const keyboard = {
 
     properties: {
         value: '',
-        capsLock: false
+        capsLock: false,
+        shift: false,
+        lang: false,
+        speech: false
     },
+
+    keysList: [],
+
+    keysListEn: [
+        ['1', '!'],
+        ['2', '@'],
+        ['3', '#'],
+        ['4', '$'],
+        ['5', '%'],
+        ['6', '^'],
+        ['7', '&'],
+        ['8', '*'],
+        ['9', '('],
+        ['0', ')'],
+        ['-', '_'],
+        ['=', '+'], 'backspace', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', ['\\', '|'],
+        'capslock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'enter',
+        'shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', ['/', '?'], 'shift', 'done',
+        'en', 'micro', 'space', 'left', 'right'
+    ],
+
+    keysListRu: [
+        ['1', '!'],
+        ['2', '@'],
+        ['3', '#'],
+        ['4', '$'],
+        ['5', '%'],
+        ['6', '^'],
+        ['7', '&'],
+        ['8', '*'],
+        ['9', '('],
+        ['0', ')'],
+        ['-', '_'],
+        ['=', '+'],
+        'backspace', 'й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', ["\\", "/"],
+        'capslock', 'ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'enter',
+        'shift', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', ['.', ','], 'shift', 'done',
+        'ru', 'micro', 'space', 'left', 'right'
+    ],
 
     init() {
         this.elements.main = document.createElement('div');
@@ -67,34 +114,90 @@ const keyboard = {
         }
     },
 
+    _toggleShift() {
+        this.properties.shift = !this.properties.shift;
+
+        for (let i = 0; i < this.elements.keyboardKeysList.length; i++) {
+
+            if (this.elements.keyboardKeysList[i].childElementCount === 0) {
+                if (Array.isArray(this.keysList[i])) {
+                    this.elements.keyboardKeysList[i].textContent = this.properties.shift ? this.keysList[i][1] : this.keysList[i][0];
+                }
+            }
+        }
+
+        let index = 0;
+        for (let key of this.elements.keyboardKeysList) {
+            if (key.childElementCount === 0) {
+                key.textContent = this.properties.shift ? key.textContent.toUpperCase() : key.textContent.toLowerCase();
+            }
+            index++;
+        }
+    },
+
+    _toggleLang() {
+        this.properties.lang = !this.properties.lang;
+
+        for (let i = 0; i < this.elements.keyboardKeysList.length; i++) {
+            if (this.elements.keyboardKeysList[i].childElementCount === 0) {
+                if (!Array.isArray(this.keysList[i])) {
+                    this.elements.keyboardKeysList[i].textContent = this.properties.lang ? this.keysListRu[i] : this.keysListEn[i];
+                }
+            }
+        }
+    },
+
+    _recordingResult(e) {
+        const transcript = Array.from(e.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+
+        document.querySelector('textarea').value = transcript;
+    },
+
+    _startRecording() {
+        recognition.start();
+    },
+
+    _toggleSpeech() {
+        this.properties.speech = !this.properties.speech;
+
+        if (this.properties.speech) {
+            recognition.start();
+            recognition.addEventListener('result', this._recordingResult);
+            recognition.addEventListener('end', this._startRecording);
+        } else {
+            recognition.abort();
+            recognition.removeEventListener('result', this._recordingResult);
+            recognition.removeEventListener('end', this._startRecording);
+        }
+    },
+
     _createKeys() {
         const fragment = document.createDocumentFragment();
-
-        const keysList = [
-            '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'backspace',
-            'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
-            'capslock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'enter',
-            'done', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '?',
-            'space'
-        ];
 
         const setIcon = (buttonName) => {
             return `<i class="material-icons">${buttonName}</i>`;
         };
 
-        keysList.forEach(key => {
+        this.properties.lang ? this.keysList = this.keysListRu : this.keysList = this.keysListEn;
+
+        this.keysList.forEach(key => {
             const button = document.createElement('button');
             button.classList.add('keyboard__key');
 
-            const addBreakLine = ['backspace', 'p', 'enter', '?'].indexOf(key) !== -1;
+            const addBreakLine = ['backspace', "\\", 'enter', 'done'].indexOf(key) !== -1;
 
             switch (key) {
+
                 case 'backspace':
                     {
-                        button.classList.add('keyboard__key-wide');
+                        button.classList.add('keyboard__key-wide', 'keyboard__backspace');
                         button.innerHTML = setIcon('backspace');
 
                         button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
                             this.properties.value = this.properties.value.substring(0, this.properties.length - 1);
                             this._triggerHandlers('onInput');
                         });
@@ -108,8 +211,9 @@ const keyboard = {
                         button.innerHTML = setIcon('keyboard_capslock');
 
                         button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            button.classList.toggle('keyboard__key-activatable');
                             this._toggleCapsLock();
-                            button.classList.toggle(this.properties.capsLock);
                         });
 
                         break;
@@ -121,6 +225,7 @@ const keyboard = {
                         button.innerHTML = setIcon('keyboard_return');
 
                         button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
                             this.properties.value += '\n';
                             this._triggerHandlers('onInput');
                         });
@@ -134,7 +239,88 @@ const keyboard = {
                         button.innerHTML = setIcon('space_bar');
 
                         button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
                             this.properties.value += ' ';
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+                case 'left':
+                    {
+                        button.innerHTML = setIcon('chevron_left');
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+                case 'right':
+                    {
+                        button.innerHTML = setIcon('chevron_right');
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+                case 'micro':
+                    {
+                        button.innerHTML = setIcon('mic');
+
+                        button.addEventListener('click', () => {
+                            this._toggleSpeech();
+                            document.querySelector('.textarea').focus();
+                            button.classList.toggle('keyboard__key-activatable');
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+
+                case 'shift':
+                    {
+                        button.classList.add('keyboard__key-wide');
+                        button.innerHTML = setIcon('arrow_drop_up');
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            button.classList.toggle('keyboard__key-activatable');
+                            this._toggleShift();
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+                case 'en':
+                    {
+                        button.textContent = this.properties.lang ? 'ru' : 'en';
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            this._toggleLang();
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
+                case 'ru':
+                    {
+                        button.textContent = this.properties.lang ? 'ru' : 'en';
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            this._toggleLang();
                             this._triggerHandlers('onInput');
                         });
 
@@ -156,9 +342,10 @@ const keyboard = {
 
                 default:
                     {
-                        button.textContent = key;
+                        button.textContent = (this.properties.shift) ? key[1] : key[0];
 
                         button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
                             this.properties.value += button.textContent;
                             this._triggerHandlers('onInput');
                         });
@@ -172,12 +359,10 @@ const keyboard = {
             if (addBreakLine) {
                 fragment.appendChild(document.createElement('br'));
             }
-
-
         });
 
         return fragment;
-    }
+    },
 };
 
 window.addEventListener('DOMContentLoaded', () => {

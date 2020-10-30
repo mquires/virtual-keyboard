@@ -1,3 +1,4 @@
+@import '../fonts.css';
 * {
     box-sizing: border-box;
     padding: 0;
@@ -11,10 +12,11 @@
 body {
     background: #000;
     color: #fff;
+    font-family: "SF-Medium";
 }
 
 .keyboard {
-    background: #121212;
+    background: #1d1d1d;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -31,24 +33,27 @@ body {
 
 .keyboard__keys {
     text-align: center;
+    max-width: 99rem;
+    margin: 0 auto;
 }
 
 .keyboard__key {
+    font-family: "SF-Medium";
     color: #fcf4f2;
-    background: #424242;
+    background: #606060;
     outline: none;
     border: none;
     border-radius: 0.8rem;
-    padding: 1.3rem 2rem;
     cursor: pointer;
     font-size: 2rem;
-    height: 5rem;
+    width: 6rem;
+    height: 6rem;
     transition: background .3s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
-    margin: 1rem 1vw;
+    margin: 0.4rem;
 }
 
 .keyboard__key:hover {
@@ -57,23 +62,35 @@ body {
 
 .keyboard__key:active {
     background: #666;
+    border-color: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
 }
 
 .keyboard__key-wide {
-    width: 8%;
+    background: #3a3a3a;
+    width: 10rem;
 }
 
 .keyboard__key-extra-wide {
-    width: 30%;
-    max-width: 45rem;
+    width: 45rem;
+    background: #3a3a3a;
+}
+
+.keyboard__key-activatable {
+    background: #ccc;
 }
 
 .textarea {
+    font-family: "SF-Medium";
     background: #000;
-    width: 100%;
+    width: 70%;
     height: 40vh;
     resize: none;
     outline: none;
-    border: none;
+    border: 0.3rem solid #323232;
     color: #fff;
+    border-radius: 1rem;
+    font-size: 2rem;
+    padding: 2rem;
+    margin: 2rem auto;
+    display: flex;
 }

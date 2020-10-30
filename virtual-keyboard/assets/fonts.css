@@ -1,0 +1,14 @@
+@font-face {
+    font-family: "SF-Bold";
+    src: url("./fonts/SFUIText-Bold.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SF-Light";
+    src: url("./fonts/SFUIText-Light.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SF-Medium";
+    src: url("./fonts/SFUIText-Medium.woff") format("woff");
+}
