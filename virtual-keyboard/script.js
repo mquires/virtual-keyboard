@@ -1,7 +1,8 @@
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-const recognition = new SpeechRecognition();
+let recognition = new SpeechRecognition();
 recognition.interimResults = true;
+recognition.continuous = true;
 
 const keyboard = {
     elements: {
@@ -20,7 +21,8 @@ const keyboard = {
         capsLock: false,
         shift: false,
         lang: false,
-        speech: false
+        speech: false,
+        sound: false
     },
 
     keysList: [],
@@ -40,7 +42,7 @@ const keyboard = {
         ['=', '+'], 'backspace', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', ['\\', '|'],
         'capslock', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'enter',
         'shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', ['/', '?'], 'shift', 'done',
-        'en', 'micro', 'space', 'left', 'right'
+        'en', 'micro', 'sound', 'space', 'left', 'right'
     ],
 
     keysListRu: [
@@ -59,7 +61,7 @@ const keyboard = {
         'backspace', 'й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', ["\\", "/"],
         'capslock', 'ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'enter',
         'shift', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', ['.', ','], 'shift', 'done',
-        'ru', 'micro', 'space', 'left', 'right'
+        'ru', 'micro', 'sound', 'space', 'left', 'right'
     ],
 
     init() {
@@ -145,33 +147,39 @@ const keyboard = {
                 }
             }
         }
+
+        recognition.lang = this.properties.lang ? "ru-RU" : "en-US";
     },
 
-    _recordingResult(e) {
+    /*_recordingResult(e) {
         const transcript = Array.from(e.results)
             .map(result => result[0])
             .map(result => result.transcript)
             .join('');
+
+        if (e.results[0].isFinal) {
+            document.querySelector('textarea').value += '\n';
+        }
 
         document.querySelector('textarea').value = transcript;
     },
 
     _startRecording() {
         recognition.start();
-    },
+    },*/
 
-    _toggleSpeech() {
-        this.properties.speech = !this.properties.speech;
+    _toggleSound() {
+        this.properties.sound = !this.properties.sound;
 
-        if (this.properties.speech) {
-            recognition.start();
-            recognition.addEventListener('result', this._recordingResult);
-            recognition.addEventListener('end', this._startRecording);
-        } else {
-            recognition.abort();
-            recognition.removeEventListener('result', this._recordingResult);
-            recognition.removeEventListener('end', this._startRecording);
-        }
+        document.querySelectorAll('.keyboard__key').forEach(key => {
+            key.addEventListener('click', () => {
+                const audio = document.querySelector(`[data-${this.properties.lang ? 'ru' : 'en'}-lang]`);
+
+                if (!audio) return;
+                audio.currentTime = 0;
+                this.properties.sound && audio.play();
+            })
+        })
     },
 
     _createKeys() {
@@ -285,6 +293,21 @@ const keyboard = {
                         break;
                     }
 
+                case 'sound':
+                    {
+                        button.classList.add('keyboard__sound');
+                        button.innerHTML = setIcon('volume_up');
+
+                        button.addEventListener('click', () => {
+                            document.querySelector('.textarea').focus();
+                            this._toggleSound();
+                            button.classList.toggle('keyboard__key-activatable');
+                            this._triggerHandlers('onInput');
+                        });
+
+                        break;
+                    }
+
 
                 case 'shift':
                     {
@@ -362,6 +385,31 @@ const keyboard = {
         });
 
         return fragment;
+    },
+
+    _toggleSpeech() {
+        this.properties.speech = !this.properties.speech;
+
+        recognition.lang = this.properties.lang ? "ru-RU" : "en-US";
+
+        if (this.properties.speech) {
+            recognition.start();
+            recognition.continuous = true;
+
+            recognition.addEventListener('result', (e) => {
+                const transcript = Array.from(e.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('');
+
+                document.querySelector('textarea').value = transcript;
+            });
+            //  recognition.addEventListener('end', this._startRecording);
+        } else {
+            recognition.abort();
+            // recognition.removeEventListener('result', this._recordingResult);
+            //  recognition.removeEventListener('end', this._startRecording);
+        }
     },
 };
 

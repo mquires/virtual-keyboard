@@ -62,7 +62,6 @@ body {
 
 .keyboard__key:active {
     background: #666;
-    border-color: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
 }
 
 .keyboard__key-wide {
@@ -93,4 +92,62 @@ body {
     padding: 2rem;
     margin: 2rem auto;
     display: flex;
+}
+
+@media screen and (max-width: 1010px) {
+    .keyboard__keys {
+        max-width: 70rem;
+    }
+    .keyboard__key {
+        width: 4rem;
+        height: 4rem;
+        margin: 0.2rem;
+    }
+    .keyboard__key-wide {
+        width: 10rem;
+    }
+    .keyboard__key-extra-wide {
+        width: 45rem;
+    }
+}
+
+@media screen and (max-width: 735px) {
+    .keyboard__keys {
+        max-width: 64rem;
+    }
+    .keyboard__key {
+        font-size: 1.5rem;
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+    .keyboard__key-extra-wide {
+        width: 25rem;
+    }
+}
+
+@media screen and (max-width: 688px) {
+    .keyboard__keys {
+        max-width: 38rem;
+    }
+    .keyboard__key {
+        width: 2rem;
+    }
+    .keyboard__key-wide {
+        width: 5rem;
+    }
+    .material-icons {
+        font-size: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 688px) {
+    .keyboard__keys {
+        max-width: 35rem;
+    }
+    .keyboard__key-wide {
+        width: 3rem;
+    }
+    .keyboard__key-extra-wide {
+        width: 15rem;
+    }
 }
