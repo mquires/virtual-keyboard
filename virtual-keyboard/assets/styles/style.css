@@ -60,8 +60,12 @@ body {
     background: #666;
 }
 
+.key__background {
+    background: #ccc;
+}
+
 .keyboard__key:active {
-    background: #666;
+    background: #ccc;
 }
 
 .keyboard__key-wide {

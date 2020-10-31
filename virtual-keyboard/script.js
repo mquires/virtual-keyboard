@@ -195,6 +195,18 @@ const keyboard = {
             const button = document.createElement('button');
             button.classList.add('keyboard__key');
 
+            document.addEventListener('keydown', (e) => {
+                if (e.key == button.textContent) {
+                    button.classList.add('key__background');
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (e.key == button.textContent) {
+                    button.classList.remove('key__background');
+                }
+            });
+
             const addBreakLine = ['backspace', "\\", 'enter', 'done'].indexOf(key) !== -1;
 
             switch (key) {
@@ -416,3 +428,9 @@ const keyboard = {
 window.addEventListener('DOMContentLoaded', () => {
     keyboard.init();
 });
+
+document.querySelectorAll('.keyboard__key').forEach(key => {
+    key.addEventListener('keydown', () => {
+        console.log(key)
+    });
+})
