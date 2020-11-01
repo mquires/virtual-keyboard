@@ -218,7 +218,7 @@ const keyboard = {
 
                         button.addEventListener('click', () => {
                             document.querySelector('.textarea').focus();
-                            this.properties.value = this.properties.value.substring(0, this.properties.length - 1);
+                            this.properties.value = this.properties.value.substring(0, this.properties.value.length - 1);
                             this._triggerHandlers('onInput');
                         });
 
@@ -273,6 +273,13 @@ const keyboard = {
 
                         button.addEventListener('click', () => {
                             document.querySelector('.textarea').focus();
+                            if (document.querySelector(".textarea").selectionStart == 0) {
+                                document.querySelector(".textarea").selectionStart = 0;
+                                document.querySelector(".textarea").selectionEnd = document.querySelector(".textarea").selectionStart;
+                            } else {
+                                document.querySelector(".textarea").selectionStart -= 1;
+                                document.querySelector(".textarea").selectionEnd = document.querySelector(".textarea").selectionStart;
+                            }
                             this._triggerHandlers('onInput');
                         });
 
@@ -285,6 +292,8 @@ const keyboard = {
 
                         button.addEventListener('click', () => {
                             document.querySelector('.textarea').focus();
+                            document.querySelector(".textarea").selectionStart += 1;
+                            document.querySelector(".textarea").selectionEnd = document.querySelector(".textarea").selectionStart;
                             this._triggerHandlers('onInput');
                         });
 
